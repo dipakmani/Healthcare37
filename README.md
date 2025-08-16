@@ -9,51 +9,80 @@ fake = Faker()
 # Number of records
 n = 500000
 
-# Sample lookup values
+# Lookup values
 departments = ["Cardiology", "Orthopedics", "Neurology", "Oncology", "Pediatrics", "General Surgery", "Gynecology"]
 procedures = ["Bypass Surgery", "Knee Replacement", "Brain Tumor Removal", "Chemotherapy", "Appendectomy", "C-Section"]
+equipments = ["ECG Machine", "X-Ray", "Ventilator", "Defibrillator", "Surgical Robot", "Dialysis Machine"]
+equipment_types = ["Monitoring", "Imaging", "Surgical Tool", "Life Support"]
+manufacturers = ["GE Healthcare", "Siemens", "Philips", "Medtronic", "Johnson & Johnson"]
 anesthesia_types = ["General", "Local", "Regional"]
 operation_types = ["Major", "Minor", "Emergency", "Elective"]
 complications = ["None", "Infection", "Bleeding", "Organ Failure", "Respiratory Issues"]
+insurance_providers = ["Aetna", "United Health", "Blue Cross", "Cigna", "Kaiser Permanente"]
 
 # Generate dataset
 data = {
-    "OperationID": np.arange(1, n+1),
+    # Patient (ID + attributes)
     "PatientID": np.random.randint(1000, 20000, n),
+    "PatientName": [fake.name() for _ in range(n)],
+    "Gender": np.random.choice(["Male", "Female"], n),
+    "Age": np.random.randint(1, 90, n),
+
+    # Doctor
     "DoctorID": np.random.randint(100, 500, n),
-    "AssistantDoctorID": np.random.randint(500, 800, n),
+    "DoctorName": [fake.name() for _ in range(n)],
+    "Specialty": np.random.choice(departments, n),
+    "ExperienceYears": np.random.randint(1, 40, n),
+
+    # Hospital
     "HospitalID": np.random.randint(1, 50, n),
-    "Department": np.random.choice(departments, n),
-    "Procedure": np.random.choice(procedures, n),
+    "HospitalName": [fake.company() for _ in range(n)],
+    "City": [fake.city() for _ in range(n)],
+    "AccreditationLevel": np.random.choice(["A", "B", "C"], n),
+
+    # Department
+    "DepartmentID": np.random.randint(10, 100, n),
+    "DepartmentName": np.random.choice(departments, n),
+    "Floor": np.random.randint(1, 10, n),
+    "HeadDoctorName": [fake.name() for _ in range(n)],
+
+    # Procedure
+    "ProcedureID": np.random.randint(1000, 2000, n),
+    "ProcedureName": np.random.choice(procedures, n),
+    "ProcedureType": np.random.choice(operation_types, n),
+    "AverageDuration": np.random.randint(30, 300, n),
+
+    # Equipment
+    "EquipmentID": np.random.randint(5000, 7000, n),
+    "EquipmentName": np.random.choice(equipments, n),
+    "EquipmentType": np.random.choice(equipment_types, n),
+    "Manufacturer": np.random.choice(manufacturers, n),
+
+    # Medical
+    "MedicalID": np.random.randint(9000, 12000, n),
+    "DiagnosisCode": [fake.lexify(text="???-###") for _ in range(n)],  # ICD-like code
+    "InsuranceProvider": np.random.choice(insurance_providers, n),
+    "PolicyNumber": [fake.bothify(text="POL####??") for _ in range(n)],
+
+    # Date Info
+    "DateID": np.arange(1, n+1),
     "OperationDate": [fake.date_between(start_date="-2y", end_date="today") for _ in range(n)],
-    "DischargeDate": [fake.date_between(start_date="-2y", end_date="today") for _ in range(n)],
-    "OperationRoomNumber": np.random.randint(1, 50, n),
-    "OperationType": np.random.choice(operation_types, n),
+    "DayOfWeek": np.random.choice(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], n),
+    "Month": np.random.randint(1, 13, n),
+
+    # Operation Facts
     "AnesthesiaType": np.random.choice(anesthesia_types, n),
-    "SurgicalTeamCount": np.random.randint(3, 10, n),
-    "EquipmentUsedID": np.random.randint(1000, 5000, n),
-    "ImplantUsedFlag": np.random.choice(["Yes", "No"], n),
-    "BloodUnitsUsed": np.random.randint(0, 5, n),
+    "OperationType": np.random.choice(operation_types, n),
     "DurationMinutes": np.random.randint(30, 600, n),
-    "PreOpDiagnosis": [fake.word() for _ in range(n)],
-    "PostOpDiagnosis": [fake.word() for _ in range(n)],
     "OperationCost": np.random.randint(5000, 200000, n),
-    "InsuranceCoverage": np.random.randint(1000, 150000, n),
-    "PatientPayable": np.random.randint(500, 50000, n),
-    "MedicationCost": np.random.randint(1000, 30000, n),
-    "EquipmentCost": np.random.randint(500, 20000, n),
-    "ComplicationsFlag": np.random.choice(["Yes", "No"], n),
-    "ComplicationType": np.random.choice(complications, n),
-    "SuccessFlag": np.random.choice(["Yes", "No"], n, p=[0.9, 0.1]),
-    "MortalityFlag": np.random.choice(["Yes", "No"], n, p=[0.98, 0.02]),
-    "ReadmissionFlag": np.random.choice(["Yes", "No"], n, p=[0.85, 0.15]),
-    "RecoveryDays": np.random.randint(1, 60, n)
+    "ComplicationsFlag": np.random.choice(["Yes", "No"], n, p=[0.1, 0.9]),
+    "SuccessFlag": np.random.choice(["Yes", "No"], n, p=[0.92, 0.08])
 }
 
 # Create DataFrame
 df = pd.DataFrame(data)
 
-# Save to CSV
-df.to_csv("Fact_PatientOperations.csv", index=False)
+# Save single CSV file
+df.to_csv("Fact_Operations.csv", index=False)
 
-print("✅ Fact_PatientOperations.csv generated with", n, "records.")
+print("✅ Fact_Operations.csv generated with", n, "records and", df.shape[1], "columns.")
